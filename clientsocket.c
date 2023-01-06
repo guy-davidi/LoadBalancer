@@ -9,17 +9,21 @@
 
 int main(int argc, char *argv[])
 {
- 
+    if(argc < 2) {
+        printf("Nope.\n");
+        exit(0);
+    }
     int sock = socket(AF_INET, SOCK_STREAM, 0);
   
-    struct sockaddr_in serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));  
+    struct sockaddr_in adress_details;
+    memset(&adress_details, 0, sizeof(adress_details));  
     
-    serv_addr.sin_family = AF_INET;  
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");  
-    serv_addr.sin_port = htons(5566); 
+    adress_details.sin_family = AF_INET;  
+    adress_details.sin_addr.s_addr = inet_addr("127.0.0.1");  
 
-    connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    adress_details.sin_port = htons(5566); 
+
+    connect(sock, (struct sockaddr*)&adress_details, sizeof(adress_details));
    
     // create message
     char *message = (char*) calloc(strlen(argv[1])+1, sizeof(char)) ;
@@ -31,7 +35,7 @@ int main(int argc, char *argv[])
     // get a response
     char *buffer = (char*) calloc(buffersize, sizeof(char)) ;
     read(sock, buffer, buffersize);
-    printf("result form server: %s\n", buffer);
+    printf("result: %s\n", buffer);
 
     free(message);
     free(buffer);

@@ -1,8 +1,8 @@
 all: client server
 .PHONY : all
 
-server: serversocket.c
-	gcc -Wall -Wextra -g serversocket.c -o server
+server: ex3_lb.c
+	gcc -Wall -Wextra -g ex3_lb.c -o ex3_lb
 
 
 client: clientsocket.c
