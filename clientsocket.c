@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define buffersize 1024
+#define BUFFER_SIZE 1024
 
 int main(int argc, char *argv[])
 {
@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
         printf("Nope.\n");
         exit(0);
     }
+    char buffesr[15] = {0};
     int sock = socket(AF_INET, SOCK_STREAM, 0);
   
     struct sockaddr_in adress_details;
@@ -21,7 +22,15 @@ int main(int argc, char *argv[])
     adress_details.sin_family = AF_INET;  
     adress_details.sin_addr.s_addr = inet_addr("127.0.0.1");  
 
-    adress_details.sin_port = htons(5566); 
+
+    int port_number_to_connect;
+
+    FILE *port_file = fopen("http_port", "r");
+    port_number_to_connect = atoi(fgets(buffesr, 10, port_file));
+    printf("Connecting to %d\n", port_number_to_connect);
+    fclose(port_file);
+
+    adress_details.sin_port = htons(port_number_to_connect); 
 
     connect(sock, (struct sockaddr*)&adress_details, sizeof(adress_details));
    
@@ -33,8 +42,8 @@ int main(int argc, char *argv[])
     send(sock, message, strlen(message)+1, 0) ;
 
     // get a response
-    char *buffer = (char*) calloc(buffersize, sizeof(char)) ;
-    read(sock, buffer, buffersize);
+    char *buffer = (char*) calloc(BUFFER_SIZE, sizeof(char)) ;
+    read(sock, buffer, BUFFER_SIZE);
     printf("result: %s\n", buffer);
 
     free(message);
