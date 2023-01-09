@@ -1,0 +1,34 @@
+#!/usr/bin/env python3 
+import socket
+import sys
+
+def server_program():
+    # get the hostname
+    host = "127.0.0.1"
+    port = int(sys.argv[1])  # initiate port no above 1024
+    counter = 0
+    while True:
+
+        with socket.socket() as server_socket: # get instance
+
+            server_socket.connect((host, port))  # bind host address and port together
+            counter+=1
+            print(f"\n\nWaiting for data: {counter}\n")
+            data = server_socket.recv(1024).decode() # get data steam
+            # receive data stream. it won't accept data packet greater than 1024 bytes
+            print("from connected user: " + str(data))
+            
+            result = "'\r\n\r\n\r\n\r\n'"
+            print(f"Server sending the response:\n``{result}``\nto the LB")
+            server_socket.send(result.encode())  # send result to the client
+
+
+
+
+    
+
+
+
+
+if __name__ == '__main__':
+    server_program()
