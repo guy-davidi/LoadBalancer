@@ -3,6 +3,8 @@ import socket
 import sys
 
 def server_program():
+
+    counter_dict = {}
     # get the hostname
     host = "127.0.0.1"
     port = int(sys.argv[1])  # initiate port no above 1024
@@ -12,20 +14,35 @@ def server_program():
         with socket.socket() as server_socket: # get instance
 
             server_socket.connect((host, port))  # bind host address and port together
+            
             counter+=1
             print(f"\n\nWaiting for data: {counter}\n")
-            data = server_socket.recv(1024).decode() # get data steam
-            # receive data stream. it won't accept data packet greater than 1024 bytes
-            print("from connected user: " + str(data))
+
+
+            data = ''
+            while True: # read data stream - chunks of 1kB
+                data += server_socket.recv(1024).decode()
+                
+                print(f"Data recieved:\n{data}")        
+                print(data.count('\r\n\r\n') )
+                if data.count('\r\n\r\n') == 1:
+                    break
+
+
+            data_array = data.split(" ") # [GET, /counter, ...]
+            print(data_array[1])
+
+            counter_dict[data_array[1]] = counter_dict.get(data_array[1], 0) + 1
+         
+
+            print(counter_dict[data_array[1]] )
             
-            result = "'\r\n\r\n\r\n\r\n'"
-            print(f"Server sending the response:\n``{result}``\nto the LB")
+            result = f"HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: {len(str(counter_dict[data_array[1]]))}\r\n\r\n{str(counter_dict[data_array[1]])}\r\n\r\n"
+            
+            # print(f"Server sending the response:\n``{result}``\nto the LB")
             server_socket.send(result.encode())  # send result to the client
 
 
-
-
-    
 
 
 

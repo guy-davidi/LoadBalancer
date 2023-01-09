@@ -12,7 +12,7 @@
 
 #define UPPER_PORT_BOUND 64000
 #define LOWER_PORT_BOUND 1025
-#define buffersize 1024
+#define BUFFER_SIZE 1024
 #define BIND_FAIL -1
 
 int randNumberinRange(int lower, int upper) {
@@ -99,30 +99,55 @@ int main(){
 
 
       // get request from user
-      char *buffer = (char*) calloc(buffersize, sizeof(char));
-      recv(client_connection, buffer, buffersize, 0) ;
+      char *buffer = (char*) calloc(BUFFER_SIZE, sizeof(char));
+      size_t buffer_size = BUFFER_SIZE;
 
 
-      printf("LB received the request: %s\n", buffer) ;
+      ssize_t num_bytes_received;
+
+      while ((num_bytes_received = recv(client_connection, buffer, buffer_size, 0)) > 0) {
+          
+          // Check if the buffer needs to be reallocated
+          if (buffer_size - num_bytes_received < 4) {
+              buffer_size *= 2;
+              char* new_buffer = realloc(buffer, buffer_size);
+
+              if (new_buffer == NULL) {
+                  perror("realloc failed");
+                  free(buffer);
+                  return 1;
+              }
+              
+              printf("Realloced ! :), new buffer size = %d\n", (int)buffer_size);
+              buffer = new_buffer;
+          }
+
+          // Check if we've received the "\r\n\r\n" sequence
+          size_t num_bytes = num_bytes_received;
+          if (num_bytes >= 4 && strncmp(buffer + num_bytes - 4, "\r\n\r\n", 4) == 0) {
+              break;
+          }
+      }
 
 
 
-      char *returnvalue = (char*) calloc(buffersize, sizeof(char));
+      printf("LB received request of size: %d\n", (int)strlen(buffer)) ;
+
+
+
+      char *returnvalue = (char*) calloc(BUFFER_SIZE, sizeof(char));
 
 
       /* SERVER FOWRARD */       
-      printf("LB forwarding the request: %s\n", buffer) ;
-
-      send(server_connection, buffer, buffersize, 0) ;
+      send(server_connection, buffer, BUFFER_SIZE, 0) ;
 
       /*LB GETS A RESPONSE FROM SERVER */
-      recv(server_connection, buffer, buffersize, 0) ;
-      printf("LB got a response: %s\n", buffer) ;
+      recv(server_connection, buffer, BUFFER_SIZE, 0) ;
+      // printf("LB got a response: %s\n", buffer) ;
 
 
       /* SERVER RETURN RESPONSE */  
-      printf("LB returns the result from the server: %s\n", buffer) ;
-      send(client_connection, buffer, buffersize, 0) ;
+      send(client_connection, buffer, BUFFER_SIZE, 0) ;
 
       /* ^^ SERVER RETURN ^^ */
       free(returnvalue);
