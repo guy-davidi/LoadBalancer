@@ -100,54 +100,57 @@ int main(){
 
       // get request from user
       char *buffer = (char*) calloc(BUFFER_SIZE, sizeof(char));
-      size_t buffer_size = BUFFER_SIZE;
+      int buffer_size = BUFFER_SIZE;
 
 
-      ssize_t num_bytes_received;
+      int num_bytes_received;
+      int bytes_read = 0;
+      
+      while (true) {
+          num_bytes_received = recv(client_connection, buffer+bytes_read, buffer_size-bytes_read, 0);
+          bytes_read += num_bytes_received;
 
-      while ((num_bytes_received = recv(client_connection, buffer, buffer_size, 0)) > 0) {
+          printf("recieving data\n\n\n\n%s\n\n\n\n...", buffer);
           
           // Check if the buffer needs to be reallocated
-          if (buffer_size - num_bytes_received < 4) {
-              buffer_size *= 2;
-              char* new_buffer = realloc(buffer, buffer_size);
+          if (bytes_read == buffer_size ) {
+            buffer_size *= 2;
+            buffer = realloc(buffer, buffer_size);
+            
+            if(buffer == NULL)
+              printf("\nERROR ALLOCATING\n");
 
-              if (new_buffer == NULL) {
-                  perror("realloc failed");
-                  free(buffer);
-                  return 1;
-              }
-              
-              printf("Realloced ! :), new buffer size = %d\n", (int)buffer_size);
-              buffer = new_buffer;
+            printf("Realloced ! :), new buffer size = %d\n", (int)buffer_size);
           }
 
           // Check if we've received the "\r\n\r\n" sequence
-          size_t num_bytes = num_bytes_received;
-          if (num_bytes >= 4 && strncmp(buffer + num_bytes - 4, "\r\n\r\n", 4) == 0) {
-              break;
+          // check for the desired string
+          char* found = strstr(buffer, "\r\n\r\n");
+
+          if (found != NULL) {
+            // desired string found
+            break;
           }
-      }
+        }
 
 
 
-      printf("LB received request of size: %d\n", (int)strlen(buffer)) ;
+      printf("LB received request:\n\n%s\n\n", buffer) ;
 
 
 
       char *returnvalue = (char*) calloc(BUFFER_SIZE, sizeof(char));
 
-
       /* SERVER FOWRARD */       
-      send(server_connection, buffer, BUFFER_SIZE, 0) ;
+      send(server_connection, buffer, buffer_size, 0) ;
 
       /*LB GETS A RESPONSE FROM SERVER */
-      recv(server_connection, buffer, BUFFER_SIZE, 0) ;
-      // printf("LB got a response: %s\n", buffer) ;
+      recv(server_connection, returnvalue, BUFFER_SIZE, 0) ;
+      printf("LB got a response: %s\n", returnvalue) ;
 
 
       /* SERVER RETURN RESPONSE */  
-      send(client_connection, buffer, BUFFER_SIZE, 0) ;
+      send(client_connection, returnvalue, strlen(returnvalue), 0) ;
 
       /* ^^ SERVER RETURN ^^ */
       free(returnvalue);
