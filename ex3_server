@@ -1,6 +1,7 @@
 #!/usr/bin/env python3 
 import socket
 import sys
+from time import *
 
 def server_program():
 
@@ -36,7 +37,6 @@ def server_program():
             
             print(f"Server sending the response:\n``{result}``\nto the LB")
             server_socket.send(result.encode())  # send result to the client
-
 
 
 

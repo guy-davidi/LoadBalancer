@@ -19,6 +19,18 @@ int randNumberinRange(int lower, int upper) {
   return (rand() % (upper - lower+ 1)) + lower;
 }
 
+int numOccurencesInString(char *string, char* substring) {
+  int num_apperences = 0;
+  char* found = string;
+
+  while((found = strstr(found, substring)) != NULL) {
+    found += strlen(substring);
+    num_apperences++;
+  }
+
+  return num_apperences;
+}
+
 
 void writeNumberToFile(char *file_name, int num)
 {
@@ -48,11 +60,27 @@ int createNewSocket(int *socket_fd) {
 }
 
 
+bool setTimeOutValues(int socket_fd)
+{    
+  struct timeval timeout;
+  timeout.tv_sec = 5; // sec
+  timeout.tv_usec = 0; // ms
+
+    // set recv and send timeout
+  if( setsockopt (socket_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0 ) {
+    return false;
+  }
+  
+  if( setsockopt (socket_fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0 ) {
+    return false;
+    }
+
+  return true;
+}
+
 int main(){
     srand(time(NULL));
-    struct timeval timeout;
-    timeout.tv_sec = 5; // sec
-    timeout.tv_usec = 0; // ms
+
 
 
     int lb_client_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -78,59 +106,45 @@ int main(){
     socklen_t server_addr_size = sizeof(server_addr);
 
     while (true) {
+
       printf("\n\nWaiting for connection...\n");
       int client_connection = accept(lb_client_socket, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
       int server_connection = accept(lb_server_socket, (struct sockaddr*)&server_addr, &server_addr_size);
       
-      // set recv and send timeout
-      if( setsockopt (client_connection, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0 ) {
-        printf( "setsockopt fail\n" );
+      if(client_connection == -1 || server_connection == -1) {
+        printf("accept Error...\n");
+        exit(1);
       }
-      
-      if( setsockopt (client_connection, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0 ) {
-        printf( "setsockopt fail\n" ) ;
+
+      if(setTimeOutValues(client_connection) == false || setTimeOutValues(server_connection) == false) {
+        printf("Error settign timeout values..\n");
+        exit(1);
       }
-      if( setsockopt (server_connection, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0 ) {
-        printf( "setsockopt fail\n" ) ;
-      }
-      if( setsockopt (server_connection, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout)) < 0 ) {
-        printf( "setsockopt fail\n" ) ;
-      }
+
 
 
       // get request from user
       char *buffer = (char*) calloc(BUFFER_SIZE, sizeof(char));
       int buffer_size = BUFFER_SIZE;
-
-
-      int num_bytes_received;
       int bytes_read = 0;
       
       while (true) {
-          num_bytes_received = recv(client_connection, buffer+bytes_read, buffer_size-bytes_read, 0);
-          bytes_read += num_bytes_received;
+          bytes_read += recv(client_connection, buffer+bytes_read, buffer_size-bytes_read, 0);
 
-          printf("recieving data\n\n\n\n%s\n\n\n\n...", buffer);
-          
           // Check if the buffer needs to be reallocated
           if (bytes_read == buffer_size ) {
             buffer_size *= 2;
             buffer = realloc(buffer, buffer_size);
-            
-            if(buffer == NULL)
-              printf("\nERROR ALLOCATING\n");
-
             printf("Realloced ! :), new buffer size = %d\n", (int)buffer_size);
           }
 
           // Check if we've received the "\r\n\r\n" sequence
-          // check for the desired string
-          char* found = strstr(buffer, "\r\n\r\n");
 
-          if (found != NULL) {
+          if (numOccurencesInString(buffer, "\r\n\r\n") != 0) {
             // desired string found
             break;
           }
+
         }
 
 
@@ -139,21 +153,33 @@ int main(){
 
 
 
-      char *returnvalue = (char*) calloc(BUFFER_SIZE, sizeof(char));
-
       /* SERVER FOWRARD */       
       send(server_connection, buffer, buffer_size, 0) ;
 
+
+      char *return_buffer = (char*) calloc(BUFFER_SIZE, sizeof(char));
+      
+      
       /*LB GETS A RESPONSE FROM SERVER */
-      recv(server_connection, returnvalue, BUFFER_SIZE, 0) ;
-      printf("LB got a response: %s\n", returnvalue) ;
+      
+      bytes_read = 0;
+
+      while (true) {
+          bytes_read += recv(server_connection, return_buffer + bytes_read, BUFFER_SIZE - bytes_read, 0);
+
+          if (numOccurencesInString(return_buffer, "\r\n\r\n") == 2) {
+            break;
+          }
+        }
+
+      printf("LB got a response:--\n%s--\n", return_buffer) ;
 
 
       /* SERVER RETURN RESPONSE */  
-      send(client_connection, returnvalue, strlen(returnvalue), 0) ;
+      send(client_connection, return_buffer, strlen(return_buffer), 0) ;
 
       /* ^^ SERVER RETURN ^^ */
-      free(returnvalue);
+      free(return_buffer);
       free(buffer);
       close(client_connection) ;
 
