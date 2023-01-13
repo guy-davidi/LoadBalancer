@@ -1,23 +1,21 @@
-all: client server
+all: ex3_lb
 .PHONY : all
 
-server: ex3_lb.c
-	gcc -Wall -Wextra -g ex3_lb.c -o ex3_lb
+CC = gcc
+CFLAGS = -g -Wall
 
-
-client: clientsocket.c
-	gcc -Wall -Wextra -g clientsocket.c -o client
+ex3_lb: ex3_lb.c socket_helper.c
+	$(CC) $(CFLAGS) -o ex3_lb ex3_lb.c socket_helper.c
 
 
 .PHONY : test
 test: 
 	./mytest.sh
 
+
 .PHONY : clean
 clean:
-	\rm server
-	\rm client
-
+	\rm ex3_lb
 
 tidycode:
 	clang-format -i *.c *.h

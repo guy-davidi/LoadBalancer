@@ -1,43 +1,35 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python2
 import socket
 import sys
-from time import *
 
 def server_program():
-
+    CHUNK_SIZE = 1024
     counter_dict = {}
-    # get the hostname
     host = "127.0.0.1"
-    port = int(sys.argv[1])  # initiate port no above 1024
-    counter = 0
+    port = int(sys.argv[1]) 
+
     while True:
-
-        with socket.socket() as server_socket: # get instance
-
-            server_socket.connect((host, port))  # bind host address and port together
-            
-            counter+=1
-            print(f"\n\nWaiting for data: {counter}\n")
+        server_socket = socket.socket()       # get instance, no need to bind - OS will choose port for us.  
+        server_socket.connect((host, port))  
         
 
-            data = ''
-            while True: # read data stream - chunks of 1kB
-                data += server_socket.recv(1024).decode()
-                print(f"Data recieved:\n{data}")        
-                if data.count('\r\n\r\n') == 1:
-                    break
+        data = ''
+        while True: 
+            data += server_socket.recv(CHUNK_SIZE).decode()
+            if data.count('\r\n\r\n') == 1:
+                break
 
 
-            data_array = data.split(" ") # [GET, /counter, ...]
+        data_array = data.split(" ") # [GET, /counter, ...]
 
-            counter_dict[data_array[1]] = counter_dict.get(data_array[1], 0) + 1
-         
-            
-            result = f"HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: {len(str(counter_dict[data_array[1]]))}\r\n\r\n{str(counter_dict[data_array[1]])}\r\n\r\n"
-            
-            print(f"Server sending the response:\n``{result}``\nto the LB")
-            server_socket.send(result.encode())  # send result to the client
-
+        counter_dict[data_array[1]] = counter_dict.get(data_array[1], 0) + 1
+    
+        
+        result = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + str(len(str(counter_dict[data_array[1]]))) +"\r\n\r\n"+str(counter_dict[data_array[1]])+"\r\n\r\n"
+        
+        server_socket.send(result.encode())  # send result to the client
+        
+        server_socket.close()
 
 
 
