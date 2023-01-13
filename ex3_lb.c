@@ -29,10 +29,10 @@ void writeNumberToFile(char* file_name, int num)
   fclose(fp);
 }
 
-void recieveAndForward(int source_connection, int destination_connection, int num_end_string_occurences) 
+void recieveAndForward(int source_connection, int destination_connection, int num_end_string_occurences)
 {
 
-  char *buffer = (char*)calloc(BUFFER_SIZE, sizeof(char));
+  char* buffer = (char*)calloc(BUFFER_SIZE, sizeof(char));
   int buffer_size = BUFFER_SIZE;
   int bytes_read = 0;
 
@@ -41,7 +41,7 @@ void recieveAndForward(int source_connection, int destination_connection, int nu
     // Check if the buffer needs to be reallocated
     if (bytes_read == buffer_size) {
       buffer_size *= 2;
-      printf("Reallocing...\n");
+      printf("Reallocating...\n");
       buffer = realloc(buffer, buffer_size);
     }
 
@@ -52,7 +52,6 @@ void recieveAndForward(int source_connection, int destination_connection, int nu
   printf("sending %s\n", buffer);
   send(destination_connection, buffer, buffer_size, 0);
   free(buffer);
-
 }
 
 void loadBalance(int lb_client_socket, int lb_server_socket)
@@ -80,9 +79,8 @@ void loadBalance(int lb_client_socket, int lb_server_socket)
       exit(1);
     }
 
-    recieveAndForward(client_connection, server_connection, 1); // count 1 \r\n\r\n
-    recieveAndForward(server_connection, client_connection, 2); // count 2 \r\n\r\n
-
+    recieveAndForward(client_connection, server_connection, 1);  // count 1 \r\n\r\n
+    recieveAndForward(server_connection, client_connection, 2);  // count 2 \r\n\r\n
 
     close(client_connection);
     close(server_connection);
