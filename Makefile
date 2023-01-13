@@ -19,3 +19,5 @@ clean:
 
 tidycode:
 	clang-format -i *.c *.h
+
+format_test:
