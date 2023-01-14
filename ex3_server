@@ -9,9 +9,8 @@ def server_program():
     port = int(sys.argv[1]) 
 
     while True:
-        server_socket = socket.socket()       # get instance, no need to bind - OS will choose port for us.  
+        server_socket = socket.socket()
         server_socket.connect((host, port))  
-        print "Getting Data..."
 
         data = ''
         while True: 
@@ -28,7 +27,6 @@ def server_program():
         result = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + str(len(str(counter_dict[data_array[1]]))) +"\r\n\r\n"+str(counter_dict[data_array[1]])+"\r\n\r\n"
         
         server_socket.send(result.encode())  # send result to the client
-        print "Sending result..."
         server_socket.close()
 
 

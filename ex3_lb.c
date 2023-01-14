@@ -49,7 +49,6 @@ void recieveAndForward(int source_connection, int destination_connection, int nu
       break;
     }
   }
-  printf("sending %s\n", buffer);
   send(destination_connection, buffer, buffer_size, 0);
   free(buffer);
 }
@@ -58,15 +57,15 @@ void loadBalance(int lb_client_socket, int lb_server_socket)
 {
   int client_connection, server_connection;
 
-  struct sockaddr_in clnt_addr;
-  socklen_t clnt_addr_size = sizeof(clnt_addr);
+  struct sockaddr_in client_addr;
+  socklen_t client_addr_size = sizeof(client_addr);
 
   struct sockaddr_in server_addr;
   socklen_t server_addr_size = sizeof(server_addr);
 
   while (true) {
 
-    client_connection = accept(lb_client_socket, (struct sockaddr*)&clnt_addr, &clnt_addr_size);
+    client_connection = accept(lb_client_socket, (struct sockaddr*)&client_addr, &client_addr_size);
     server_connection = accept(lb_server_socket, (struct sockaddr*)&server_addr, &server_addr_size);
 
     if (client_connection == -1 || server_connection == -1) {
@@ -79,8 +78,8 @@ void loadBalance(int lb_client_socket, int lb_server_socket)
       exit(1);
     }
 
-    recieveAndForward(client_connection, server_connection, 1);  // count 1 \r\n\r\n
-    recieveAndForward(server_connection, client_connection, 2);  // count 2 \r\n\r\n
+    recieveAndForward(client_connection, server_connection, 1);  // read untill 1 \r\n\r\n in the request
+    recieveAndForward(server_connection, client_connection, 2);  // read untill 2 \r\n\r\n in the response
 
     close(client_connection);
     close(server_connection);
