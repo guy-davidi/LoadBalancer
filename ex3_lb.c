@@ -9,6 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#define FLAGS 0
 #define BUFFER_SIZE 1024
 #define MAX_PENDING_QUEUE 20
 int numOccurencesInString(char* string, char* substring)
@@ -50,7 +51,7 @@ void recieveAndForward(int source_connection, int destination_connection, int nu
     }
   }
   
-  send(destination_connection, buffer, strlen(buffer), 0); 
+  send(destination_connection, buffer, strlen(buffer), FLAGS); 
   free(buffer);
 }
 
