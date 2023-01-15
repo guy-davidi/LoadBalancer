@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 import socket
 import sys
 
@@ -13,20 +13,19 @@ def server_program():
         server_socket.connect((host, port))  
 
         data = ''
-        while True: 
+        while '\r\n\r\n' not in data: 
             data += server_socket.recv(CHUNK_SIZE).decode()
-            if data.count('\r\n\r\n') == 1:
-                break
+
 
 
         data_array = data.split(" ") # [GET, /counter, ...]
-
         counter_dict[data_array[1]] = counter_dict.get(data_array[1], 0) + 1
     
         
         result = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + str(len(str(counter_dict[data_array[1]]))) +"\r\n\r\n"+str(counter_dict[data_array[1]])+"\r\n\r\n"
+        result = result.encode()
+        server_socket.send(result)  # send result to the client
         
-        server_socket.send(result.encode())  # send result to the client
         server_socket.close()
 
 

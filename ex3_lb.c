@@ -10,7 +10,7 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024
-
+#define MAX_PENDING_QUEUE 20
 int numOccurencesInString(char* string, char* substring)
 {
   int num_apperences = 0;
@@ -49,7 +49,8 @@ void recieveAndForward(int source_connection, int destination_connection, int nu
       break;
     }
   }
-  send(destination_connection, buffer, buffer_size, 0);
+  
+  send(destination_connection, buffer, strlen(buffer), 0); 
   free(buffer);
 }
 
@@ -98,8 +99,8 @@ int main()
   int lb_server_port_number = BindSocketRandomPort(lb_server_socket);
   writeNumberToFile("server_port", lb_server_port_number);
 
-  listen(lb_client_socket, 20);
-  listen(lb_server_socket, 20);
+  listen(lb_client_socket, MAX_PENDING_QUEUE);
+  listen(lb_server_socket, MAX_PENDING_QUEUE);
 
   loadBalance(lb_client_socket, lb_server_socket);
 
