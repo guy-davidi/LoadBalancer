@@ -9,6 +9,8 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: true
 AlwaysBreakBeforeMultilineStrings: true
+BraceWrapping:
+  BeforeElse: false
 BreakBeforeBinaryOperators: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
@@ -31,7 +33,7 @@ PointerBindsToType: true
 SpacesBeforeTrailingComments: 2
 Cpp11BracedListStyle: true
 Standard:        Auto
-IndentWidth:     2
+IndentWidth:     4
 TabWidth:        8
 UseTab:          Never
 BreakBeforeBraces: Linux
@@ -44,4 +46,3 @@ SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
 ContinuationIndentWidth: 4
 ...
-

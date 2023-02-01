@@ -1,11 +1,11 @@
-all: ex3_lb
+all: lb
 .PHONY : all
 
 CC = gcc
 CFLAGS = -g -Wall
 
-ex3_lb: ex3_lb.c socket_helper.c
-	$(CC) $(CFLAGS) -o ex3_lb ex3_lb.c socket_helper.c
+lb: lb.c socket_helper.c
+	$(CC) $(CFLAGS) -o lb lb.c socket_helper.c
 
 
 .PHONY : test
@@ -15,7 +15,7 @@ test:
 
 .PHONY : clean
 clean:
-	\rm ex3_lb
+	\rm lb
 
 tidycode:
 	clang-format -i *.c *.h

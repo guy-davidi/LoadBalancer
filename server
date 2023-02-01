@@ -1,0 +1,43 @@
+#!/usr/bin/python2.7 -tt
+import socket
+import sys
+
+ERROR_MSG = "HTTP/1.1 404 Not Found\r\nContent-type: text/html\r\nContent-length: 113\r\n\r\n<html><head><title>Not Found</title></head><body>\r\nSorry, the object you requested was not found.\r\n</body></html>\r\n\r\n"""
+
+
+def server_program():
+    CHUNK_SIZE = 1024
+    counter = 0
+    server_request_counter = 0
+    host = "127.0.0.1"
+    port = int(sys.argv[1]) 
+
+    while True:
+        server_socket = socket.socket()
+        server_socket.connect((host, port))  
+        data = ''
+        while '\r\n\r\n' not in data: 
+            data += server_socket.recv(CHUNK_SIZE).decode()
+        
+        server_request_counter+= 1
+        print "Server got a request (" + str(server_request_counter) + ")..."
+
+        data_array = data.split(" ") # [GET, /counter, ...]
+        
+        if(data_array[1] == "/counter"):
+            counter += 1
+            result = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + str(len(str(counter))) +"\r\n\r\n"+str(counter)+"\r\n\r\n"
+        else:
+            result = ERROR_MSG
+        
+        print "returning the result..."
+        result = result.encode()
+        server_socket.send(result)  # send result to the client
+        
+        server_socket.close()
+
+
+
+
+if __name__ == '__main__':
+    server_program()
