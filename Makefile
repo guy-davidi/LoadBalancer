@@ -10,7 +10,9 @@ lb: lb.c socket_helper.c
 
 .PHONY : clean
 clean:
-	\rm lb
+	\rm lb || true
+	\rm http_port || true
+	\rm server_port || true
 
 tidycode:
 	clang-format -i *.c *.h
