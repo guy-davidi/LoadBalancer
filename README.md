@@ -6,7 +6,7 @@ in this project, we explore basic socket communication in C.
 the load balancer gets requests from the internet, and forwards them to be processed on backend servers, instead of proccessing them itself.
 
 ## How-to
-For this you will need 2+ terminals, (one for the servers, and one for the load balancer)
+For this you will need 2+ terminals, (one [or more] for the servers, and one for the load balancer)
 
 from the first terminal navigate to this project's directory and start the LB.
 note - the LB generates a random port number and places it inside the file `server_port` and `http_port`, we will use them later.
