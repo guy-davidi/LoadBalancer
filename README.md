@@ -58,3 +58,7 @@ Each server will return how many times it got the `counter` request.
 
 
 
+## Makefile
+- `make` will make the executable `lb`
+- `make clean` will remove the executable and temp files
+- `make tidycode` will clean up your code if you with to play around with it
