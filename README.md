@@ -21,7 +21,6 @@ Now from a different terminal, start the server
 ```
 ./server `cat server_port`
 ```
-
 Now you can use your browser and check if it works!
 
 in your browser navigate to 
