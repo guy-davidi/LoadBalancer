@@ -53,10 +53,6 @@ Each server will return how many times it got the `counter` request.
     (you can view the processes with the `ps` command 
     and kill them with `kill <pid>`)
 
-
-
-
-
 ## Makefile
 - `make` will make the executable `lb`
 - `make clean` will remove the executable and temp files
