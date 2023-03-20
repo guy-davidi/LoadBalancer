@@ -35,7 +35,6 @@ if for example the number in the file `http_port` is 41571:
 
 Each server will return how many times it got the `counter` request.
 
-
 # if you want more than one server
 
 - you can use extra terminals and from each terminal run the above commmands
